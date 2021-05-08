@@ -3,6 +3,8 @@ part of 'bird_count_bloc.dart';
 @immutable
 abstract class BirdCountEvent {}
 
+class LoadStoredCountData extends BirdCountEvent {}
+
 class IncreaseBrown extends BirdCountEvent {}
 
 class IncreaseGrey extends BirdCountEvent {}
