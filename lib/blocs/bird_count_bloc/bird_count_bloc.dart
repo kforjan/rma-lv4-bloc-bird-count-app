@@ -9,7 +9,9 @@ part 'bird_count_event.dart';
 part 'bird_count_state.dart';
 
 class BirdCountBloc extends Bloc<BirdCountEvent, BirdCountState> {
-  BirdCountBloc(this.spHelper) : super(BirdCountInitial());
+  BirdCountBloc(this.spHelper) : super(BirdCountInitial()) {
+    this.add(LoadStoredCountData());
+  }
 
   SharedPreferencesHelper spHelper;
 

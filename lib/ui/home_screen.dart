@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rma_lv4_bird_counting_bloc/data/sharedpref/shared_preferences_helper.dart';
-import 'package:rma_lv4_bird_counting_bloc/injection_container.dart' as di;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rma_lv4_bird_counting_bloc/blocs/bird_count_bloc/bird_count_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -10,14 +10,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int count;
-  Color color;
+  // @override
+  // void initState() {
+  //   super.initState();
 
-  @override
-  void initState() {
-    super.initState();
-    _getSharedPrefs();
-  }
+  //   BlocProvider.of<BirdCountBloc>(context).add(LoadStoredCountData());
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -28,43 +26,23 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 100,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(20),
-                  ),
-                ),
-                child: count == null
-                    ? Center(
-                        child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Colors.white)),
-                      )
-                    : Center(
-                        child: Text(
-                          count.toString(),
-                          style: TextStyle(fontSize: 60, color: Colors.white),
-                        ),
-                      ),
-              ),
-            ),
+          BlocConsumer<BirdCountBloc, BirdCountState>(
+            listener: (context, state) {},
+            builder: (context, state) => _buildBirdCountDisplay(state),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildIncrementButton('Brown', Colors.brown),
-              _buildIncrementButton('Grey', Colors.grey),
-              _buildIncrementButton('Black', Colors.black),
-              _buildIncrementButton('Orange', Colors.orange),
+              _buildIncrementButton(context, 'Brown', Colors.brown),
+              _buildIncrementButton(context, 'Grey', Colors.grey),
+              _buildIncrementButton(context, 'Black', Colors.black),
+              _buildIncrementButton(context, 'Orange', Colors.orange),
             ],
           ),
           ElevatedButton(
-            onPressed: _onResetButtonTap,
+            onPressed: () {
+              _onResetButtonTap(context);
+            },
             child: Text('Reset'),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.red),
@@ -75,10 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildIncrementButton(String text, Color color) {
+  Widget _buildIncrementButton(BuildContext context, String text, Color color) {
     return ElevatedButton(
       onPressed: () {
-        _onIncrementButtonTap(text);
+        _onIncrementButtonTap(context, text);
       },
       child: Text(text),
       style: ButtonStyle(
@@ -87,58 +65,53 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _onIncrementButtonTap(String color) {
+  Widget _buildBirdCountDisplay(BirdCountState state) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          height: 100,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: state.color,
+            borderRadius: BorderRadius.all(
+              Radius.circular(20),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              state.count.toString(),
+              style: TextStyle(fontSize: 60, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onIncrementButtonTap(BuildContext context, String color) {
+    final birdCountBloc = BlocProvider.of<BirdCountBloc>(context);
     switch (color) {
       case 'Brown':
-        setState(() {
-          this.color = Colors.brown;
-          count++;
-        });
-        di.locator<SharedPreferencesHelper>().saveLastBirdColor('brown');
+        birdCountBloc.add(IncreaseBrown());
         break;
       case 'Grey':
-        setState(() {
-          this.color = Colors.grey;
-          count++;
-        });
-        di.locator<SharedPreferencesHelper>().saveLastBirdColor('grey');
+        birdCountBloc.add(IncreaseGrey());
         break;
       case 'Black':
-        setState(() {
-          this.color = Colors.black;
-          count++;
-        });
-        di.locator<SharedPreferencesHelper>().saveLastBirdColor('black');
+        birdCountBloc.add(IncreaseBlack());
         break;
       case 'Orange':
-        setState(() {
-          this.color = Colors.orange;
-          count++;
-        });
-        di.locator<SharedPreferencesHelper>().saveLastBirdColor('orange');
+        birdCountBloc.add(IncreaseOrange());
         break;
       default:
-        setState(() {
-          this.color = Colors.blue;
-        });
+        break;
     }
-    di.locator<SharedPreferencesHelper>().saveBirdCount(this.count);
   }
 
-  void _onResetButtonTap() {
-    setState(() {
-      this.color = Colors.blue;
-      this.count = 0;
-    });
-    di.locator<SharedPreferencesHelper>().deleteAllData();
-  }
+  void _onResetButtonTap(BuildContext context) {
+    final birdCountBloc = BlocProvider.of<BirdCountBloc>(context);
 
-  Future<Null> _getSharedPrefs() async {
-    final data =
-        await di.locator<SharedPreferencesHelper>().getStoredBirdData();
-    setState(() {
-      count = data['count'];
-      color = data['color'];
-    });
+    birdCountBloc.add(ResetCounter());
   }
 }
