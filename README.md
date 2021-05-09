@@ -2,7 +2,7 @@
 
 A Flutter application for counting birds of various colors using BLoC pattern made for Mobile Application Development class.
 
-## Abot
+## About
 This application has the same functionality as the application from [rma-lv3-bird-count-app](https://github.com/kforjan/rma-lv3-bird-count-app) but it has business logic separated from the user interface. That is accomplished by using BLoC pattern instead of setState() calls inside of the presentation layer. The code is noticeably easier to read and it would be easier to implement new features or fix bugs after separating the business logic from UI.
 
 ## Task
